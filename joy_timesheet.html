@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joy's Weekly Timesheet</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #475569;
+            min-height: 100vh;
+            padding: 10px;
+        }
+        
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #475569;
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 13px;
+            opacity: 0.95;
+        }
+        
+        .content {
+            padding: 15px;
+        }
+        
+        .info-box {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 12px;
+            border-left: 3px solid #475569;
+            font-size: 12px;
+            color: #555;
+        }
+        
+        .info-box strong {
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .info-content {
+            margin-top: 8px;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+        
+        .day-row {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+        
+        .day-row:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-color: #475569;
+        }
+        
+        .weekend {
+            background: #fafafa;
+        }
+        
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .day-name {
+            font-weight: 600;
+            font-size: 15px;
+            color: #333;
+        }
+        
+        .day-date {
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+            background: #f0f4ff;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+        
+        .status-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        
+        .status-btn {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.15s;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .status-btn:hover {
+            border-color: #475569;
+        }
+        
+        .status-btn.active {
+            background: #475569;
+            color: white;
+            border-color: #475569;
+        }
+        
+        .off-reason-selector {
+            margin-bottom: 8px;
+        }
+        
+        .off-reason-selector label {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 4px;
+            display: block;
+        }
+        
+        .off-reason-selector select {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        
+        .pto-day-counter {
+            font-size: 11px;
+            color: #666;
+            padding: 6px;
+            background: #fff3cd;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            border-left: 3px solid #f97316;
+        }
+        
+        .pto-day-counter.sick {
+            background: #e0e7ff;
+            border-left-color: #6366f1;
+        }
+        
+        .pto-day-counter.over-limit {
+            background: #fee;
+            border-left-color: #ff4444;
+            font-weight: 600;
+        }
+        
+        .time-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr 65px;
+            gap: 6px;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .input-group label {
+            font-size: 10px;
+            color: #666;
+            margin-bottom: 3px;
+            font-weight: 500;
+        }
+        
+        select.time-select,
+        input[type="number"] {
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 13px;
+            transition: all 0.2s;
+            width: 100%;
+            background: white;
+        }
+        
+        select.time-select:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #475569;
+            box-shadow: 0 0 0 2px rgba(71, 85, 105, 0.1);
+        }
+        
+        input:disabled,
+        select:disabled {
+            background: #f5f5f5;
+            color: #999;
+            cursor: not-allowed;
+        }
+        
+        .rate-indicator {
+            font-size: 10px;
+            color: #888;
+            margin-top: 6px;
+        }
+        
+        .summary {
+            background: #475569;
+            color: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .summary h3 {
+            font-size: 15px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+        
+        .summary-total {
+            border-top: 2px solid rgba(255,255,255,0.3);
+            padding-top: 8px;
+            margin-top: 8px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            background: #475569;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 3px 10px rgba(71, 85, 105, 0.3);
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(71, 85, 105, 0.4);
+        }
+        
+        .result-box {
+            background: #e8f5e9;
+            border: 1px solid #4caf50;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .result-box.show {
+            display: block;
+        }
+        
+        .result-box h3 {
+            color: #2e7d32;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+        
+        .copy-area {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 8px 0;
+            font-family: monospace;
+            font-size: 10px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .copy-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        
+        .copy-btn:hover {
+            background: #45a049;
+        }
+        
+        .warning-box {
+            background: #ff4444;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 12px 0;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+        }
+        
+        .warning-box.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <form id="timesheetForm">
+        <div class="container">
+            <div class="header">
+                <h1>📋 Joy's Weekly Timesheet</h1>
+                <p id="weekDisplay">Week of February 23, 2026</p>
+            </div>
+            
+            <div class="content">
+                <div class="info-box">
+                    <strong onclick="toggleInstructions()">
+                        <span>Instructions</span>
+                        <span id="instructionsToggle">▼</span>
+                    </strong>
+                    <div id="instructionsContent" class="info-content" style="display: none;">
+                        <p style="margin-bottom: 6px;">For each day, select "Worked" or "Did Not Work". If you didn't work, choose the reason from the dropdown.</p>
+                        <ul style="margin-left: 15px; margin-top: 6px;">
+                            <li><strong>Paid Off:</strong> Family didn't need care (doesn't count against personal days)</li>
+                            <li><strong>Paid Holiday:</strong> Federal holiday (paid)</li>
+                            <li><strong>Personal Day:</strong> Counts against your 5 personal days</li>
+                            <li><strong>Unpaid Off:</strong> Day off without pay (doesn't count against personal days)</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div id="limitWarning" class="warning-box"></div>
+                
+                <!-- Monday -->
+                <div class="day-row">
+                    <div class="day-header">
+                        <span class="day-name">Monday</span>
+                        <span class="day-date" id="date0">Mon 2/23</span>
+                    </div>
+                    <div class="status-selector">
+                        <button type="button" class="status-btn active" data-day="0" data-status="worked">✓ Worked</button>
+                        <button type="button" class="status-btn" data-day="0" data-status="off">✗ Did Not Work</button>
+                    </div>
+                    <div id="offReason0" class="off-reason-selector" style="display: none;">
+                        <label>Reason:</label>
+                        <select id="offType0">
+                            <option value="paid-off">Paid Off (family didn't need care)</option>
+                            <option value="holiday">Paid Holiday</option>
+                            <option value="pto">Personal Day</option>
+                            <option value="unpaid-off">Unpaid Off</option>
+                        </select>
+                    </div>
+                    <div id="ptoCounter0" class="pto-day-counter" style="display: none;"></div>
+                    <div class="time-inputs">
+                        <div class="input-group">
+                            <label>Start Time</label>
+                            <select class="time-select" id="start0" data-default="07:00"></select>
+                        </div>
+                        <div class="input-group">
+                            <label>End Time</label>
+                            <select class="time-select" id="end0" data-default="12:00"></select>
+                        </div>
+                        <div class="input-group">
+                            <label>Paid Hours</label>
+                            <input type="number" id="hours0" step="0.5" value="8" min="0" max="24">
+                        </div>
+                    </div>
+                    <div class="rate-indicator">Rate: $28/hour</div>
+                </div>
+
+                <!-- Tuesday -->
+                <div class="day-row">
+                    <div class="day-header">
+                        <span class="day-name">Tuesday</span>
+                        <span class="day-date" id="date1">Tue 2/24</span>
+                    </div>
+                    <div class="status-selector">
+                        <button type="button" class="status-btn active" data-day="1" data-status="worked">✓ Worked</button>
+                        <button type="button" class="status-btn" data-day="1" data-status="off">✗ Did Not Work</button>
+                    </div>
+                    <div id="offReason1" class="off-reason-selector" style="display: none;">
+                        <label>Reason:</label>
+                        <select id="offType1">
+                            <option value="paid-off">Paid Off (family didn't need care)</option>
+                            <option value="holiday">Paid Holiday</option>
+                            <option value="pto">Personal Day</option>
+                            <option value="unpaid-off">Unpaid Off</option>
+                        </select>
+                    </div>
+                    <div id="ptoCounter1" class="pto-day-counter" style="display: none;"></div>
+                    <div class="time-inputs">
+                        <div class="input-group">
+                            <label>Start Time</label>
+                            <select class="time-select" id="start1" data-default="07:00"></select>
+                        </div>
+                        <div class="input-group">
+                            <label>End Time</label>
+                            <select class="time-select" id="end1" data-default="12:00"></select>
+                        </div>
+                        <div class="input-group">
+                            <label>Paid Hours</label>
+                            <input type="number" id="hours1" step="0.5" value="5" min="0" max="24">
+                        </div>
+                    </div>
+                    <div class="rate-indicator">Rate: $28/hour</div>
+                </div>
+
+                <!-- Wednesday -->
+                <div class="day-row">
+                    <div class="day-header">
+                        <span class="day-name">Wednesday</span>
+                        <span class="day-date" id="date2">Wed 2/25</span>
+                    </div>
+                    <div class="status-selector">
+                        <button type="button" class="status-btn active" data-day="2" data-status="worked">✓ Worked</button>
+                        <button type="button" class="status-btn" data-day="2" data-status="off">✗ Did Not Work</button>
+                    </div>
+                    <div id="offReason2" class="off-reason-selector" style="display: none;">
+                        <label>Reason:</label>
+                        <select id="offType2">
+                            <option value="paid-off">Paid Off (family didn't need care)</option>
+                            <option value="holiday">Paid Holiday</option>
+                            <option value="pto">Personal Day</option>
+                            <option value="unpaid-off">Unpaid Off</option>
+                        </select>
+                    </div>
+                    <div id="ptoCounter2" class="pto-day-counter" style="display: none;"></div>
+                    <div class="time-inputs">
+                        <div class="input-group">
+                            <label>Start Time</label>
+                            <select class="time-select" id="start2" data-default="07:00"></select>
+                        </div>
+                        <div class="input-group">
+                            <label>End Time</label>
+                            <select class="time-select" id="end2" data-default="12:00"></select>
+                        </div>
+                        <div class="input-group">
+                            <label>Paid Hours</label>
+                            <input type="number" id="hours2" step="0.5" value="5" min="0" max="24">
+                        </div>
+                    </div>
+                    <div class="rate-indicator">Rate: $28/hour</div>
+                </div>
+
+                <!-- Thursday -->
+                <div class="day-row">
+                    <div class="day-header">
+                        <span class="day-name">Thursday</span>
+                        <span class="day-date" id="date3">Thu 2/26</span>
+                    </div>
+                    <div class="status-selector">
+                        <button type="button" class="status-btn active" data-day="3" data-status="worked">✓ Worked</button>
+                        <button type="button" class="status-btn" data-day="3" data-status="off">✗ Did Not Work</button>
+                    </div>
+                    <div id="offReason3" class="off-reason-selector" style="display: none;">
+                        <label>Reason:</label>
+                        <select id="offType3">
+                            <option value="paid-off">Paid Off (family didn't need care)</option>
+                            <option value="holiday">Paid Holiday</option>
+                            <option value="pto">Personal Day</option>
+                            <option value="unpaid-off">Unpaid Off</option>
+                        </select>
+                    </div>
+                    <div id="ptoCounter3" class="pto-day-counter" style="display: none;"></div>
+                    <div class="time-inputs">
+                        <div class="input-group">
+                            <label>Start Time</label>
+                            <select class="time-select" id="start3" data-default="07:00"></select>
+                        </div>
+                        <div class="input-group">
+                            <label>End Time</label>
+                            <select class="time-select" id="end3" data-default="12:00"></select>
+                        </div>
+                        <div class="input-group">
+                            <label>Paid Hours</label>
+                            <input type="number" id="hours3" step="0.5" value="5" min="0" max="24">
+                        </div>
+                    </div>
+                    <div class="rate-indicator">Rate: $28/hour</div>
+                </div>
+
+                <!-- Friday -->
+                <div class="day-row">
+                    <div class="day-header">
+                        <span class="day-name">Friday</span>
+                        <span class="day-date" id="date4">Fri 2/27</span>
+                    </div>
+                    <div class="status-selector">
+                        <button type="button" class="status-btn active" data-day="4" data-status="worked">✓ Worked</button>
+                        <button type="button" class="status-btn" data-day="4" data-status="off">✗ Did Not Work</button>
+                    </div>
+                    <div id="offReason4" class="off-reason-selector" style="display: none;">
+                        <label>Reason:</label>
+                        <select id="offType4">
+                            <option value="paid-off">Paid Off (family didn't need care)</option>
+                            <option value="holiday">Paid Holiday</option>
+                            <option value="pto">Personal Day</option>
+                            <option value="unpaid-off">Unpaid Off</option>
+                        </select>
+                    </div>
+                    <div id="ptoCounter4" class="pto-day-counter" style="display: none;"></div>
+                    <div class="time-inputs">
+                        <div class="input-group">
+                            <label>Start Time</label>
+                            <select class="time-select" id="start4" data-default="07:00"></select>
+                        </div>
+                        <div class="input-group">
+                            <label>End Time</label>
+                            <select class="time-select" id="end4" data-default="12:00"></select>
+                        </div>
+                        <div class="input-group">
+                            <label>Paid Hours</label>
+                            <input type="number" id="hours4" step="0.5" value="5" min="0" max="24">
+                        </div>
+                    </div>
+                    <div class="rate-indicator">Rate: $28/hour</div>
+                </div>
+
+                <!-- Saturday -->
+                <div class="day-row weekend">
+                    <div class="day-header">
+                        <span class="day-name">Saturday 🌙</span>
+                        <span class="day-date" id="date5">Sat 2/28</span>
+                    </div>
+                    <div class="status-selector">
+                        <button type="button" class="status-btn" data-day="5" data-status="worked">✓ Worked</button>
+                        <button type="button" class="status-btn active" data-day="5" data-status="off">✗ Did Not Work</button>
+                    </div>
+                    <div class="time-inputs">
+                        <div class="input-group">
+                            <label>Start Time</label>
+                            <select class="time-select" id="start5" data-default="" disabled></select>
+                        </div>
+                        <div class="input-group">
+                            <label>End Time</label>
+                            <select class="time-select" id="end5" data-default="" disabled></select>
+                        </div>
+                        <div class="input-group">
+                            <label>Paid Hours</label>
+                            <input type="number" id="hours5" step="0.5" value="0" min="0" max="24" disabled>
+                        </div>
+                    </div>
+                    <div class="rate-indicator">Rate: $30/hour (weekend rate)</div>
+                </div>
+
+                <!-- Sunday -->
+                <div class="day-row weekend">
+                    <div class="day-header">
+                        <span class="day-name">Sunday 🌙</span>
+                        <span class="day-date" id="date6">Sun 3/1</span>
+                    </div>
+                    <div class="status-selector">
+                        <button type="button" class="status-btn" data-day="6" data-status="worked">✓ Worked</button>
+                        <button type="button" class="status-btn active" data-day="6" data-status="off">✗ Did Not Work</button>
+                    </div>
+                    <div class="time-inputs">
+                        <div class="input-group">
+                            <label>Start Time</label>
+                            <select class="time-select" id="start6" data-default="" disabled></select>
+                        </div>
+                        <div class="input-group">
+                            <label>End Time</label>
+                            <select class="time-select" id="end6" data-default="" disabled></select>
+                        </div>
+                        <div class="input-group">
+                            <label>Paid Hours</label>
+                            <input type="number" id="hours6" step="0.5" value="0" min="0" max="24" disabled>
+                        </div>
+                    </div>
+                    <div class="rate-indicator">Rate: $30/hour (weekend rate)</div>
+                </div>
+                
+                <div class="summary">
+                    <h3>💰 Payment Summary</h3>
+                    <div class="summary-row">
+                        <span>Weekday Hours:</span>
+                        <span id="weekdayHours">28.0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Weekend Hours:</span>
+                        <span id="weekendHours">0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Weekday Pay ($23/hr):</span>
+                        <span id="weekdayPay">$644.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Weekend Pay ($30/hr):</span>
+                        <span id="weekendPay">$0.00</span>
+                    </div>
+                    <div class="summary-total">
+                        <div class="summary-row">
+                            <span>Total Pay:</span>
+                            <span id="totalPay">$644.00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-btn">📤 Submit Timesheet</button>
+                
+                <div id="resultBox" class="result-box">
+                    <h3>✅ Timesheet Submitted!</h3>
+                    <p>Copy the summary below and send to your employer:</p>
+                    <div id="copyArea" class="copy-area"></div>
+                    <button type="button" class="copy-btn" onclick="copyToClipboard()">📋 Copy to Clipboard</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <script>
+        const WEEKDAY_RATE = 23;
+        const WEEKEND_RATE = 30;
+        const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        
+        // Calculate dates for the current week (Monday through Sunday)
+        function getCurrentWeekDates() {
+            const today = new Date();
+            const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+            
+            let daysToMonday;
+            if (currentDay === 0) {
+                daysToMonday = -6;
+            } else {
+                daysToMonday = -(currentDay - 1);
+            }
+            
+            const monday = new Date(today);
+            monday.setDate(today.getDate() + daysToMonday);
+            
+            const dates = [];
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(monday);
+                date.setDate(monday.getDate() + i);
+                dates.push(date);
+            }
+            
+            return dates;
+        }
+        
+        function formatDate(date, style = 'short') {
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            const dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
+            
+            if (style === 'short') {
+                return `${dayName} ${month}/${day}`;
+            } else {
+                return `${month}/${day}/${date.getFullYear()}`;
+            }
+        }
+        
+        function formatWeekRange(dates) {
+            const start = dates[0];
+            const end = dates[6];
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                              'July', 'August', 'September', 'October', 'November', 'December'];
+            
+            const startMonth = monthNames[start.getMonth()];
+            const endMonth = monthNames[end.getMonth()];
+            const startDay = start.getDate();
+            const endDay = end.getDate();
+            const year = end.getFullYear();
+            
+            if (start.getMonth() === end.getMonth()) {
+                return `Week of ${startMonth} ${startDay}-${endDay}, ${year}`;
+            } else {
+                return `Week of ${startMonth} ${startDay} - ${endMonth} ${endDay}, ${year}`;
+            }
+        }
+        
+        function generateTimeOptions() {
+            const options = ['<option value="">--</option>'];
+            for (let hour = 6; hour < 23; hour++) {
+                for (let minute of [0, 30]) {
+                    const hour24 = hour;
+                    const hour12 = hour > 12 ? hour - 12 : hour;
+                    const ampm = hour >= 12 ? 'PM' : 'AM';
+                    const timeValue = `${String(hour24).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+                    const timeLabel = `${hour12}:${String(minute).padStart(2, '0')} ${ampm}`;
+                    options.push(`<option value="${timeValue}">${timeLabel}</option>`);
+                }
+            }
+            return options.join('');
+        }
+        
+        function getYearKey() {
+            return new Date().getFullYear();
+        }
+        
+        function getCumulativeTotals() {
+            const year = getYearKey();
+            const stored = localStorage.getItem(`joy_pto_tracking_${year}`);
+            if (stored) {
+                return JSON.parse(stored);
+            }
+            return { sickDays: 0, ptoDays: 2, lastSubmittedWeek: null };
+        }
+        
+        function saveCumulativeTotals(sickDays, ptoDays, weekIdentifier = null, lastWeekSick = 0, lastWeekPto = 0) {
+            const year = getYearKey();
+            const data = { 
+                sickDays, 
+                ptoDays,
+                lastSubmittedWeek: weekIdentifier,
+                lastWeekSick: lastWeekSick,
+                lastWeekPto: lastWeekPto
+            };
+            localStorage.setItem(`joy_pto_tracking_${year}`, JSON.stringify(data));
+        }
+        
+        function getCurrentWeekIdentifier() {
+            const weekDates = getCurrentWeekDates();
+            const monday = weekDates[0];
+            const year = monday.getFullYear();
+            const month = String(monday.getMonth() + 1).padStart(2, '0');
+            const day = String(monday.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        let dayStatuses = {
+            0: 'worked', 1: 'worked', 2: 'worked', 3: 'worked', 4: 'worked', 5: 'off', 6: 'off'
+        };
+        
+        let dayOffTypes = {
+            0: 'paid-off', 1: 'paid-off', 2: 'paid-off', 3: 'paid-off', 4: 'paid-off', 5: 'off', 6: 'off'
+        };
+        
+        let cumulativeTotals = getCumulativeTotals();
+        
+        function toggleInstructions() {
+            const content = document.getElementById('instructionsContent');
+            const toggle = document.getElementById('instructionsToggle');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                toggle.textContent = '▲';
+            } else {
+                content.style.display = 'none';
+                toggle.textContent = '▼';
+            }
+        }
+        
+        function initializeEventListeners() {
+            // Status button handlers
+            document.querySelectorAll('.status-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const day = parseInt(this.dataset.day);
+                    const status = this.dataset.status;
+                    
+                    // Update active status
+                    const dayButtons = document.querySelectorAll(`[data-day="${day}"]`);
+                    dayButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    dayStatuses[day] = status;
+                    
+                    const offReasonDiv = document.getElementById(`offReason${day}`);
+                    const startInput = document.getElementById(`start${day}`);
+                    const endInput = document.getElementById(`end${day}`);
+                    const hoursInput = document.getElementById(`hours${day}`);
+                    
+                    if (status === 'worked') {
+                        // Hide off reason dropdown
+                        if (offReasonDiv) offReasonDiv.style.display = 'none';
+                        
+                        // Enable time inputs
+                        startInput.disabled = false;
+                        endInput.disabled = false;
+                        hoursInput.disabled = false;
+                        
+                        // Restore defaults if empty
+                        if (!startInput.value && day < 5) {
+                            if (day === 0) {
+                                startInput.value = '07:00';
+                                endInput.value = '15:00';
+                                hoursInput.value = 8;
+                            } else {
+                                startInput.value = '07:00';
+                                endInput.value = '12:00';
+                                hoursInput.value = 5;
+                            }
+                        }
+                    } else {
+                        // Show off reason dropdown (only for weekdays)
+                        if (offReasonDiv) {
+                            offReasonDiv.style.display = 'block';
+                            // Trigger the off type handler
+                            handleOffTypeChange(day);
+                        } else {
+                            // Weekend - just disable inputs
+                            startInput.disabled = true;
+                            endInput.disabled = true;
+                            hoursInput.disabled = true;
+                            startInput.value = '';
+                            endInput.value = '';
+                            hoursInput.value = 0;
+                        }
+                    }
+                    
+                    updatePTOCounters();
+                    updateSummary();
+                });
+            });
+            
+            // Off type dropdown handlers
+            document.querySelectorAll('[id^="offType"]').forEach(select => {
+                select.addEventListener('change', function() {
+                    const day = parseInt(this.id.replace('offType', ''));
+                    handleOffTypeChange(day);
+                });
+            });
+            
+            // Time input handlers
+            document.querySelectorAll('select.time-select').forEach(select => {
+                select.addEventListener('change', function() {
+                    const dayMatch = this.id.match(/\d+/);
+                    if (dayMatch) {
+                        const day = dayMatch[0];
+                        calculateHours(day);
+                    }
+                    updateSummary();
+                });
+            });
+            
+            // Hours input handlers
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                input.addEventListener('input', updateSummary);
+            });
+        }
+        
+        function handleOffTypeChange(day) {
+            const offTypeSelect = document.getElementById(`offType${day}`);
+            const offType = offTypeSelect ? offTypeSelect.value : 'off';
+            const startInput = document.getElementById(`start${day}`);
+            const endInput = document.getElementById(`end${day}`);
+            const hoursInput = document.getElementById(`hours${day}`);
+            const counterDiv = document.getElementById(`ptoCounter${day}`);
+            
+            dayOffTypes[day] = offType;
+            
+            // Disable time inputs
+            startInput.disabled = true;
+            endInput.disabled = true;
+            hoursInput.disabled = false;
+            startInput.value = '';
+            endInput.value = '';
+            
+            // Set hours based on type
+            if (offType === 'unpaid-off') {
+                hoursInput.value = 0;
+                if (counterDiv) counterDiv.style.display = 'none';
+            } else {
+                // Set default paid hours
+                if (day === 0) {
+                    hoursInput.value = 8;
+                } else if (day < 5) {
+                    hoursInput.value = 5;
+                } else {
+                    hoursInput.value = 0;
+                }
+            }
+            
+            updatePTOCounters();
+            updateSummary();
+        }
+        
+        function calculateHours(day) {
+            const startInput = document.getElementById(`start${day}`);
+            const endInput = document.getElementById(`end${day}`);
+            const hoursInput = document.getElementById(`hours${day}`);
+            
+            if (startInput.value && endInput.value && dayStatuses[day] === 'worked') {
+                const start = startInput.value.split(':');
+                const end = endInput.value.split(':');
+                const startMinutes = parseInt(start[0]) * 60 + parseInt(start[1]);
+                const endMinutes = parseInt(end[0]) * 60 + parseInt(end[1]);
+                let diffMinutes = endMinutes - startMinutes;
+                
+                if (diffMinutes <= 0) {
+                    hoursInput.value = 0;
+                } else {
+                    const hours = diffMinutes / 60;
+                    hoursInput.value = hours.toFixed(1);
+                }
+            }
+        }
+        
+        function updatePTOCounters() {
+            let currentSick = cumulativeTotals.sickDays;
+            let currentPto = cumulativeTotals.ptoDays;
+            
+            // Count this week's usage
+            for (let i = 0; i < 7; i++) {
+                const counterDiv = document.getElementById(`ptoCounter${i}`);
+                if (!counterDiv) continue;
+                
+                const status = dayStatuses[i];
+                const offType = dayOffTypes[i];
+                
+                // Count sick/pto days before this one
+                for (let j = 0; j < i; j++) {
+                    if (dayStatuses[j] === 'off') {
+                        if (dayOffTypes[j] === 'sick') currentSick++;
+                        if (dayOffTypes[j] === 'pto') currentPto++;
+                    }
+                }
+                
+                // Show counter if this day is sick or pto
+                if (status === 'off' && (offType === 'sick' || offType === 'pto')) {
+                    // Increment for current day
+                    const thisCount = offType === 'sick' ? currentSick + 1 : currentPto + 1;
+                    const limit = 5;
+                    const label = offType === 'sick' ? 'Sick Days' : 'Personal Days';
+                    
+                    counterDiv.textContent = `${label}: ${thisCount} / ${limit} used`;
+                    counterDiv.className = 'pto-day-counter';
+                    if (offType === 'sick') counterDiv.classList.add('sick');
+                    if (thisCount > limit) {
+                        counterDiv.classList.add('over-limit');
+                        counterDiv.textContent += ' (UNPAID - over limit)';
+                        // Set hours to 0
+                        document.getElementById(`hours${i}`).value = 0;
+                    }
+                    counterDiv.style.display = 'block';
+                } else {
+                    counterDiv.style.display = 'none';
+                }
+                
+                // Reset counters for next day
+                currentSick = cumulativeTotals.sickDays;
+                currentPto = cumulativeTotals.ptoDays;
+            }
+            
+            // Update global warning
+            updateGlobalWarning();
+        }
+        
+        function updateGlobalWarning() {
+            let totalSick = cumulativeTotals.sickDays;
+            let totalPto = cumulativeTotals.ptoDays;
+            
+            for (let i = 0; i < 7; i++) {
+                if (dayStatuses[i] === 'off') {
+                    if (dayOffTypes[i] === 'sick') totalSick++;
+                    if (dayOffTypes[i] === 'pto') totalPto++;
+                }
+            }
+            
+            const warningDiv = document.getElementById('limitWarning');
+            if (totalSick > 5 || totalPto > 5) {
+                let warnings = [];
+                if (totalSick > 5) warnings.push(`Sick days: ${totalSick}/5 - Days beyond 5 are UNPAID`);
+                if (totalPto > 5) warnings.push(`Personal days: ${totalPto}/5 - Days beyond 5 are UNPAID`);
+                warningDiv.innerHTML = '⚠️ ' + warnings.join('<br>⚠️ ');
+                warningDiv.classList.add('show');
+            } else {
+                warningDiv.classList.remove('show');
+            }
+        }
+        
+        function updateSummary() {
+            let weekdayHours = 0;
+            let weekendHours = 0;
+            
+            for (let i = 0; i < 7; i++) {
+                const status = dayStatuses[i];
+                const hours = parseFloat(document.getElementById(`hours${i}`).value) || 0;
+                
+                if (status !== 'off' || (status === 'off' && dayOffTypes[i] !== 'unpaid-off')) {
+                    if (i < 5) {
+                        weekdayHours += hours;
+                    } else {
+                        weekendHours += hours;
+                    }
+                }
+            }
+            
+            const weekdayPay = weekdayHours * WEEKDAY_RATE;
+            const weekendPay = weekendHours * WEEKEND_RATE;
+            const totalPay = weekdayPay + weekendPay;
+            
+            document.getElementById('weekdayHours').textContent = weekdayHours.toFixed(1);
+            document.getElementById('weekendHours').textContent = weekendHours.toFixed(1);
+            document.getElementById('weekdayPay').textContent = `$${weekdayPay.toFixed(2)}`;
+            document.getElementById('weekendPay').textContent = `$${weekendPay.toFixed(2)}`;
+            document.getElementById('totalPay').textContent = `$${totalPay.toFixed(2)}`;
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const timeOptions = generateTimeOptions();
+            const weekDates = getCurrentWeekDates();
+            
+            document.getElementById('weekDisplay').textContent = formatWeekRange(weekDates);
+            
+            for (let i = 0; i < 7; i++) {
+                const dateElement = document.getElementById(`date${i}`);
+                if (dateElement) {
+                    dateElement.textContent = formatDate(weekDates[i], 'short');
+                }
+            }
+            
+            document.querySelectorAll('select.time-select').forEach(select => {
+                const defaultValue = select.getAttribute('data-default');
+                select.innerHTML = timeOptions;
+                if (defaultValue && defaultValue !== '') {
+                    select.value = defaultValue;
+                }
+            });
+            
+            initializeEventListeners();
+            updatePTOCounters();
+            updateSummary();
+        });
+        
+        document.getElementById('timesheetForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            let summary = '=' .repeat(50) + '\n';
+            summary += 'WEEKLY TIMESHEET SUBMISSION\n';
+            summary += '=' .repeat(50) + '\n\n';
+            
+            let sickUsedThisWeek = 0;
+            let ptoUsedThisWeek = 0;
+            
+            summary += 'DAILY BREAKDOWN:\n';
+            summary += '-'.repeat(50) + '\n';
+            
+            let totalHours = 0;
+            let totalPay = 0;
+            
+            for (let i = 0; i < 7; i++) {
+                const day = DAYS[i];
+                const status = dayStatuses[i];
+                const offType = dayOffTypes[i];
+                const start = document.getElementById(`start${i}`).value;
+                const end = document.getElementById(`end${i}`).value;
+                let hours = parseFloat(document.getElementById(`hours${i}`).value) || 0;
+                const rate = i < 5 ? WEEKDAY_RATE : WEEKEND_RATE;
+                
+                if (status === 'off') {
+                    if (offType === 'sick') sickUsedThisWeek++;
+                    if (offType === 'pto') ptoUsedThisWeek++;
+                    
+                    // Check if over limit
+                    let cumSick = cumulativeTotals.sickDays;
+                    let cumPto = cumulativeTotals.ptoDays;
+                    for (let j = 0; j < i; j++) {
+                        if (dayStatuses[j] === 'off') {
+                            if (dayOffTypes[j] === 'sick') cumSick++;
+                            if (dayOffTypes[j] === 'pto') cumPto++;
+                        }
+                    }
+                    if ((offType === 'sick' && cumSick >= 5) || (offType === 'pto' && cumPto >= 5)) {
+                        hours = 0;
+                    }
+                }
+                
+                const pay = hours * rate;
+                
+                if (status === 'worked' || (status === 'off' && offType !== 'unpaid-off')) {
+                    totalHours += hours;
+                    totalPay += pay;
+                    
+                    summary += `${day}:\n`;
+                    
+                    if (status === 'worked') {
+                        summary += start && end ? `  Time: ${start} - ${end}\n` : '  Time: (adjusted)\n';
+                    } else {
+                        summary += `  Time: --\n`;
+                        if (offType === 'holiday') summary += '  Status: PAID HOLIDAY\n';
+                        else if (offType === 'sick') summary += '  Status: PAID SICK DAY\n';
+                        else if (offType === 'pto') summary += '  Status: PERSONAL DAY (PTO)\n';
+                        else if (offType === 'paid-off') summary += '  Status: PAID OFF (family didn\'t need care)\n';
+                    }
+                    
+                    if (hours === 0 && (offType === 'sick' || offType === 'pto')) {
+                        summary += `  Paid Hours: ${hours.toFixed(2)}h (UNPAID - over limit) @ $${rate}/hr = $${pay.toFixed(2)}\n\n`;
+                    } else {
+                        summary += `  Paid Hours: ${hours.toFixed(2)}h @ $${rate}/hr = $${pay.toFixed(2)}\n\n`;
+                    }
+                } else if (status === 'off' && offType === 'unpaid-off') {
+                    summary += `${day}:\n`;
+                    summary += `  Time: --\n  Status: UNPAID OFF (day off without pay)\n`;
+                    summary += `  Paid Hours: 0.00h @ $${rate}/hr = $0.00\n\n`;
+                }
+            }
+            
+            // Check for re-submission
+            const currentWeekId = getCurrentWeekIdentifier();
+            const isResubmission = cumulativeTotals.lastSubmittedWeek === currentWeekId;
+            
+            let newSickTotal, newPtoTotal;
+            
+            if (isResubmission) {
+                const previousSick = cumulativeTotals.sickDays - (cumulativeTotals.lastWeekSick || 0);
+                const previousPto = cumulativeTotals.ptoDays - (cumulativeTotals.lastWeekPto || 0);
+                newSickTotal = previousSick + sickUsedThisWeek;
+                newPtoTotal = previousPto + ptoUsedThisWeek;
+                summary += '-'.repeat(50) + '\n';
+                summary += '📝 NOTE: Re-submission detected - updating this week\'s data\n';
+                summary += '-'.repeat(50) + '\n';
+            } else {
+                newSickTotal = cumulativeTotals.sickDays + sickUsedThisWeek;
+                newPtoTotal = cumulativeTotals.ptoDays + ptoUsedThisWeek;
+            }
+            
+            saveCumulativeTotals(newSickTotal, newPtoTotal, currentWeekId, sickUsedThisWeek, ptoUsedThisWeek);
+            cumulativeTotals = { 
+                sickDays: newSickTotal, 
+                ptoDays: newPtoTotal,
+                lastSubmittedWeek: currentWeekId,
+                lastWeekSick: sickUsedThisWeek,
+                lastWeekPto: ptoUsedThisWeek
+            };
+            
+            summary += '-'.repeat(50) + '\n';
+            summary += 'TIME OFF TRACKING:\n';
+            summary += `  Personal Days Used This Week: ${ptoUsedThisWeek}\n`;
+            summary += `  Year-to-Date Personal Days: ${newPtoTotal} / 5\n`;
+            
+            if (newPtoTotal > 5) {
+                summary += `\n  ⚠️  Personal days EXCEEDED - Days beyond 5 are UNPAID\n`;
+                summary += `     (${newPtoTotal - 5} unpaid personal day(s) this year)\n`;
+            }
+            summary += '\n';
+            
+            summary += '=' .repeat(50) + '\n';
+            summary += `TOTAL HOURS: ${totalHours.toFixed(2)}\n`;
+            summary += `TOTAL PAYMENT DUE: $${totalPay.toFixed(2)}\n`;
+            summary += '=' .repeat(50) + '\n';
+            
+            document.getElementById('copyArea').textContent = summary;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({ behavior: 'smooth' });
+        });
+        
+        function copyToClipboard() {
+            const text = document.getElementById('copyArea').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                setTimeout(() => { btn.textContent = originalText; }, 2000);
+            });
+        }
+        
+        // Hidden admin feature
+        if (window.location.search.includes('reset=true')) {
+            setTimeout(function() {
+                const sick = prompt('Enter current year-to-date sick days used (0-5):', cumulativeTotals.sickDays);
+                const pto = prompt('Enter current year-to-date personal days used (0-5):', cumulativeTotals.ptoDays);
+                
+                if (sick !== null && pto !== null) {
+                    const sickNum = parseInt(sick) || 0;
+                    const ptoNum = parseInt(pto) || 0;
+                    
+                    saveCumulativeTotals(sickNum, ptoNum, null, 0, 0);
+                    cumulativeTotals = { sickDays: sickNum, ptoDays: ptoNum, lastSubmittedWeek: null };
+                    updatePTOCounters();
+                    updateSummary();
+                    alert('Time off totals updated successfully! Remove ?reset=true from URL to continue normally.');
+                }
+            }, 500);
+        }
+    </script>
+</body>
+</html>
